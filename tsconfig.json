@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+     "module": "commonjs",
+      "moduleResolution": "node",
+      "forceConsistentCasingInFileNames": true,
+      "strict": true,
+      "noImplicitOverride": true,
+      "noPropertyAccessFromIndexSignature": true,
+      "noImplicitReturns": true,
+      "noFallthroughCasesInSwitch": true,
+      "esModuleInterop": true,
+      "lib": ["es2015"],
+      "target": "es2015"
+  },
+}

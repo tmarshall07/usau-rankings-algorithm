@@ -1,0 +1,15 @@
+{
+  "name": "rankings-testing",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "rankings": "npx ts-node -T ./run.ts"
+  },
+  "dependencies": {
+    "@types/lodash": "^4.17.20",
+    "dayjs": "^1.11.13",
+    "lodash": "^4.17.21"
+  },
+  "packageManager": "yarn@4.9.2"
+}
