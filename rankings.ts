@@ -96,9 +96,6 @@ const computeScoreWeight = (game: GameData, options: { scoreWeightMax?: number }
 const CLUB_REGULAR_SEASON_WEEKS = 13;
 const COLLEGE_REGULAR_SEASON_WEEKS = 13;
 
-const CLUB_START_DATE = new Date('2024-06-01'); // "in june", ends in "mid-september"
-const COLLEGE_START_DATE = new Date('2024-01-01'); // "in january", ends in "mid-april"
-
 const B = -0.5;
 
 export const getCurrentYearFromDivision = (division: Division) => {
@@ -120,31 +117,43 @@ export const getLevel = (division: Division) => {
   return Level.CLUB;
 };
 
+function getFirstTuesdayInMonth(year: number, month: number): Date {
+  const date = new Date(year, month, 1);
+  // 2 = Tuesday (0 = Sunday)
+  while (date.getDay() !== 2) {
+    date.setDate(date.getDate() + 1);
+  }
+  return date;
+}
+
 const computeDateWeight = (game: GameData, options: RankingOptions = {}) => {
   const level = options?.division ? getLevel(options.division) : Level.CLUB; // Default to club
-
-  let weeks = CLUB_REGULAR_SEASON_WEEKS;
-  let startDate = CLUB_START_DATE;
-  if (level === Level.COLLEGE) {
-    weeks = COLLEGE_REGULAR_SEASON_WEEKS;
-    startDate = COLLEGE_START_DATE;
-  }
-
-  // CURRENT WEEK FROM START OR CLAMP TO END OF REGULAR SEASON
-  const totalWeeks = _.clamp((new Date().getTime() - startDate.getTime()) / 1000 / 60 / 60 / 24 / 7, weeks);
-
-  const dateMultiplier = Math.pow(1.5, 1 / totalWeeks);
 
   if (!game.game.StartDate) {
     console.log('No start date for game', game);
     return 1;
   }
 
-  const currentGameWeek = _.clamp(
-    Math.floor((new Date(game.game.StartDate).getTime() - startDate.getTime()) / 1000 / 60 / 60 / 24 / 7),
-    0,
-    totalWeeks,
+  const year = new Date(game.game.StartDate).getFullYear();
+
+  // Get first tuesday in june
+  const clubStartDate = getFirstTuesdayInMonth(year, 5); // "in june", ends in "mid-september"
+  const collegeStartDate = getFirstTuesdayInMonth(year, 0); // "in january", ends in "mid-april"
+
+  let weeks = CLUB_REGULAR_SEASON_WEEKS;
+  let startDate = clubStartDate;
+  if (level === Level.COLLEGE) {
+    weeks = COLLEGE_REGULAR_SEASON_WEEKS;
+    startDate = collegeStartDate;
+  }
+
+  const dateMultiplier = Math.pow(1.5, 1 / weeks);
+
+  const gameWeek = Math.floor(
+    (new Date(game.game.StartDate).getTime() - startDate.getTime()) / 1000 / 60 / 60 / 24 / 7,
   );
+
+  const currentGameWeek = _.clamp(gameWeek, 0, weeks);
 
   const weight = Math.pow(dateMultiplier, currentGameWeek) + B;
 
